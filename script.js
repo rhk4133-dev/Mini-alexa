@@ -79,3 +79,30 @@ function respond(intent, lang) {
       speak("I am still learning. Please try again.", lang);
   }
 }
+let recognition;
+let isListening = false;
+
+function startAssistant() {
+  if (isListening) return;
+
+  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.continuous = true;
+  recognition.lang = "en-US";
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+    console.log("Heard:", transcript);
+
+    if (transcript.includes("hey alexa")) {
+      respond("Yes, I'm listening");
+    }
+  };
+
+  recognition.start();
+  isListening = true;
+}
+
+function respond(text) {
+  const speech = new SpeechSynthesisUtterance(text);
+  speechSynthesis.speak(speech);
+}
