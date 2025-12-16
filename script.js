@@ -1,108 +1,124 @@
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.lang = "en-IN";
-recognition.continuous = false;
-
-let lastIntent = null; // conversation memory
-
-function speak(text, lang = "en-IN") {
-  const msg = new SpeechSynthesisUtterance(text);
-  msg.lang = lang;
-  speechSynthesis.speak(msg);
-}
-
-function startListening() {
-  recognition.start();
-}
-
-function detectLanguage(text) {
-  if (/[ಅ-ಹ]/.test(text)) return "kn-IN";
-  if (/[ऀ-ॿ]/.test(text)) return "hi-IN";
-  return "en-IN";
-}
-
-function getIntent(text) {
-  if (/hello|hi|hey|namaste|namaskara/.test(text)) return "greet";
-  if (/time|samay|time entu/.test(text)) return "time";
-  if (/date|dinank|tarikh/.test(text)) return "date";
-  if (/who are you|tum kaun ho|neenu yaaru/.test(text)) return "identity";
-  if (/help|madad|sahaya/.test(text)) return "help";
-  return "unknown";
-}
-
-recognition.onresult = (event) => {
-  const text = event.results[0][0].transcript.toLowerCase();
-  document.getElementById("output").innerText = text;
-
-  const lang = detectLanguage(text);
-  const intent = getIntent(text);
-  lastIntent = intent;
-
-  respond(intent, lang);
-};
-
-function respond(intent, lang) {
-  if (intent === "greet") {
-    if (lang === "kn-IN") speak("ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ ಸಹಾಯಕ.", lang);
-    else if (lang === "hi-IN") speak("नमस्ते! मैं आपकी मदद के लिए हूँ।", lang);
-    else speak("Hello! I am your assistant.", lang);
-  }
-
-  else if (intent === "time") {
-    speak(new Date().toLocaleTimeString(), lang);
-  }
-
-  else if (intent === "date") {
-    speak(new Date().toDateString(), lang);
-  }
-
-  else if (intent === "identity") {
-    if (lang === "kn-IN") speak("ನಾನು ಮಿನಿ ಅಲೆಕ್ಸಾ.", lang);
-    else if (lang === "hi-IN") speak("मैं मिनी एलेक्सा हूँ।", lang);
-    else speak("I am Mini Alexa.", lang);
-  }
-
-  else if (intent === "help") {
-    if (lang === "kn-IN")
-      speak("ನೀವು ಸಮಯ, ದಿನಾಂಕ ಅಥವಾ ಸಹಾಯ ಕೇಳಬಹುದು.", lang);
-    else if (lang === "hi-IN")
-      speak("आप समय, तारीख या मदद पूछ सकते हैं।", lang);
-    else
-      speak("You can ask time, date, or help.", lang);
-  }
-
-  else {
-    if (lang === "kn-IN")
-      speak("ನಾನು ಇನ್ನೂ ಕಲಿಯುತ್ತಿದ್ದೇನೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.", lang);
-    else if (lang === "hi-IN")
-      speak("मैं अभी सीख रहा हूँ। फिर से कोशिश करें।", lang);
-    else
-      speak("I am still learning. Please try again.", lang);
-  }
-}
 let recognition;
 let isListening = false;
+
+const synth = window.speechSynthesis;
+
+function speak(text) {
+  synth.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "en-IN";
+  utter.rate = 1;
+  synth.speak(utter);
+}
 
 function startAssistant() {
   if (isListening) return;
 
   recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   recognition.continuous = true;
-  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.lang = "en-IN";
+
+  recognition.onstart = () => {
+    isListening = true;
+    speak("Hello, I am ready. You can ask me anything.");
+  };
 
   recognition.onresult = (event) => {
-    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-    console.log("Heard:", transcript);
+    const transcript =
+      event.results[event.results.length - 1][0].transcript
+        .toLowerCase()
+        .trim();
 
-    if (transcript.includes("hey alexa")) {
-      respond("Yes, I'm listening");
-    }
+    console.log("User said:", transcript);
+    handleCommand(transcript);
+  };
+
+  recognition.onerror = () => {
+    recognition.start(); // auto restart
+  };
+
+  recognition.onend = () => {
+    if (isListening) recognition.start();
   };
 
   recognition.start();
-  isListening = true;
 }
 
-function respond(text) {
-  const speech = new SpeechSynthesisUtterance(text);
-  speechSynthesis.speak(speech);
+// 🧠 Brain
+function handleCommand(text) {
+
+  // greetings
+  if (text.includes("hello") || text.includes("hi")) {
+    reply([
+      "Hello! How can I help you?",
+      "Hi there, tell me what you need",
+      "Hello, I'm listening"
+    ]);
+    return;
+  }
+
+  // name
+  if (text.includes("your name")) {
+    reply([
+      "My name is Mini Alexa",
+      "You can call me your assistant",
+      "I am your smart voice helper"
+    ]);
+    return;
+  }
+
+  // time
+  if (text.includes("time")) {
+    const time = new Date().toLocaleTimeString();
+    speak("Current time is " + time);
+    return;
+  }
+
+  // date
+  if (text.includes("date")) {
+    const date = new Date().toDateString();
+    speak("Today's date is " + date);
+    return;
+  }
+
+  // creator
+  if (text.includes("who made you") || text.includes("created you")) {
+    speak("I was created by Raghav using JavaScript");
+    return;
+  }
+
+  // Kannada
+  if (text.includes("kannada")) {
+    speak("ನಾನು ಕನ್ನಡ ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಮಾತನಾಡುತ್ತೇನೆ");
+    return;
+  }
+
+  // math
+  if (text.includes("plus") || text.includes("minus")) {
+    try {
+      const exp = text
+        .replace("plus", "+")
+        .replace("minus", "-")
+        .replace("into", "*")
+        .replace("divide", "/");
+      const result = eval(exp.match(/[0-9+\-*/ ]+/)[0]);
+      speak("The answer is " + result);
+    } catch {
+      speak("Sorry, I couldn't calculate that");
+    }
+    return;
+  }
+
+  // fallback (SMART not stupid)
+  reply([
+    "I heard you, but I am still learning",
+    "That sounds interesting, tell me something else",
+    "I am not fully trained for that yet"
+  ]);
+}
+
+function reply(responses) {
+  const msg = responses[Math.floor(Math.random() * responses.length)];
+  speak(msg);
 }
