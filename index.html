@@ -1,15 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mini Alexa</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <title>Mini Alexa – Advanced</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Mini Alexa</h1>
-  <button onclick="startAssistant()">Talk</button>
-  <p id="output">Say something...</p>
+
+  <div class="app">
+    <h1>🎙 Mini Alexa</h1>
+    <p class="subtitle">Advanced Voice Assistant (GitHub Version)</p>
+
+    <button id="talkBtn">🎧 Talk</button>
+
+    <div class="status" id="status">
+      Status: Not Listening
+    </div>
+
+    <div class="log">
+      <h3>You said:</h3>
+      <p id="userText">—</p>
+
+      <h3>Assistant:</h3>
+      <p id="botText">—</p>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
