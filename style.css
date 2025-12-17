@@ -1,76 +1,196 @@
-body {
-  background: #0a0f2e;
-  color: #eee;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  text-align: center;
-  padding: 60px 20px;
-  user-select: none;
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const talkBtn = document.getElementById("talkBtn");
+  const speakingBall = document.getElementById("speakingBall");
+  const log = document.getElementById("log");
 
-h1 {
-  margin-bottom: 40px;
-}
+  let recognition;
+  let listening = false;
+  let speaking = false;
+  let stoppedByUser = false;
 
-#talkContainer {
-  position: relative;
-  display: inline-block;
-}
+  // Command set with keywords, replies, and optional actions
+  const commands = [
+    {
+      keys: ["hello", "hi", "hey"],
+      reply: "Hello! How can I assist you today?",
+    },
+    {
+      keys: ["what is your name", "your name"],
+      reply: "I'm Mini Alexa, your personal assistant.",
+    },
+    {
+      keys: ["what are you doing", "what are you up to"],
+      reply: "I'm here listening and ready to help you.",
+    },
+    {
+      keys: ["how are you", "how are you doing"],
+      reply: "I am just code, but I am doing great!",
+    },
+    {
+      keys: ["time", "current time"],
+      reply: () => `The current time is ${new Date().toLocaleTimeString()}.`,
+    },
+    {
+      keys: ["date", "today's date"],
+      reply: () => `Today is ${new Date().toDateString()}.`,
+    },
+    {
+      keys: ["open google"],
+      reply: "Opening Google for you.",
+      action: () => window.open("https://google.com", "_blank"),
+    },
+    {
+      keys: ["open youtube"],
+      reply: "Opening YouTube for you.",
+      action: () => window.open("https://youtube.com", "_blank"),
+    },
+    {
+      keys: ["thank you", "thanks"],
+      reply: "You’re welcome!",
+    },
+    {
+      keys: ["stop listening", "stop"],
+      reply: "Okay, stopping now. Say TALK to start again.",
+      stopListening: true,
+    },
+  ];
 
-button {
-  padding: 18px 45px;
-  font-size: 22px;
-  border: none;
-  border-radius: 50%;
-  width: 130px;
-  height: 130px;
-  background: #22c55e;
-  color: black;
-  cursor: pointer;
-  font-weight: 700;
-  box-shadow: 0 0 20px #22c55e;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
-  outline: none;
-}
+  const fallbackReplies = [
+    "Sorry, I didn't catch that. Could you say it again?",
+    "Please try rephrasing your question.",
+    "I'm still learning, please ask something else.",
+    "I don't understand that yet, try another question.",
+  ];
 
-button:active {
-  transform: scale(0.95);
-}
-
-#speakingBall {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  border: 5px solid #22c55e;
-  box-shadow: 0 0 50px 15px #22c55e;
-  transform: translate(-50%, -50%) scale(0);
-  opacity: 0;
-  pointer-events: none;
-  animation: pulse 1.6s infinite;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 0 50px 15px #22c55e;
-    transform: translate(-50%, -50%) scale(1);
+  function updateSpeakingAnimation() {
+    if (speaking) {
+      speakingBall.classList.add("active");
+      talkBtn.disabled = true;
+      talkBtn.textContent = "Speaking...";
+      talkBtn.style.cursor = "not-allowed";
+    } else if (listening) {
+      speakingBall.classList.remove("active");
+      talkBtn.disabled = true;
+      talkBtn.textContent = "Listening...";
+      talkBtn.style.cursor = "wait";
+    } else {
+      speakingBall.classList.remove("active");
+      talkBtn.disabled = false;
+      talkBtn.textContent = "TALK";
+      talkBtn.style.cursor = "pointer";
+    }
   }
-  50% {
-    box-shadow: 0 0 80px 25px #22c55e;
-    transform: translate(-50%, -50%) scale(1.1);
+
+  // Speech synthesis wrapper, returns Promise so we can await it
+  function speak(text) {
+    return new Promise((resolve) => {
+      speaking = true;
+      updateSpeakingAnimation();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+
+      utterance.onend = () => {
+        speaking = false;
+        updateSpeakingAnimation();
+        resolve();
+      };
+
+      speechSynthesis.cancel(); // stop any ongoing speech
+      speechSynthesis.speak(utterance);
+    });
   }
-}
 
-#speakingBall.active {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
+  function initRecognition() {
+    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+      alert("Speech Recognition not supported in this browser");
+      return null;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recog = new SpeechRecognition();
 
-#log {
-  margin-top: 40px;
-  font-size: 20px;
-  color: #38bdf8;
-  min-height: 28px;
-}
+    recog.lang = "en-US";
+    recog.continuous = false; // Single phrase recognition per start
+    recog.interimResults = false;
+
+    recog.onresult = async (event) => {
+      const transcript = event.results[0][0].transcript.toLowerCase();
+      log.textContent = "You said: " + transcript;
+
+      recognition.stop();
+      listening = false;
+      updateSpeakingAnimation();
+
+      await handleCommand(transcript);
+
+      if (!speaking && !stoppedByUser) {
+        startListening(); // auto-restart listening after response
+      }
+    };
+
+    recog.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      listening = false;
+      updateSpeakingAnimation();
+
+      if (!stoppedByUser) {
+        startListening();
+      }
+    };
+
+    recog.onend = () => {
+      listening = false;
+      updateSpeakingAnimation();
+
+      if (!speaking && !stoppedByUser) {
+        startListening();
+      }
+    };
+
+    return recog;
+  }
+
+  async function handleCommand(text) {
+    for (const cmd of commands) {
+      for (const key of cmd.keys) {
+        if (text.includes(key)) {
+          const reply = typeof cmd.reply === "function" ? cmd.reply() : cmd.reply;
+          await speak(reply);
+          if (cmd.action) cmd.action();
+          if (cmd.stopListening) {
+            stoppedByUser = true;
+            recognition.stop();
+            listening = false;
+            updateSpeakingAnimation();
+          }
+          return;
+        }
+      }
+    }
+    // Fallback
+    const fallback = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+    await speak(fallback);
+  }
+
+  function startListening() {
+    if (listening || speaking) return;
+
+    stoppedByUser = false;
+    if (!recognition) recognition = initRecognition();
+    if (!recognition) return;
+
+    recognition.start();
+    listening = true;
+    updateSpeakingAnimation();
+    log.textContent = "Listening... Speak now.";
+  }
+
+  // Button click handler
+  talkBtn.addEventListener("click", () => {
+    if (!listening && !speaking) {
+      startListening();
+    }
+  });
+
+  updateSpeakingAnimation();
+});
