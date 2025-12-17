@@ -1,14 +1,81 @@
 body {
-  font-family: Arial;
-  text-align: center;
-  background: #0f172a;
+  background: #020617;
   color: white;
-  padding-top: 100px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding-top: 50px;
+}
+
+h1 {
+  margin-bottom: 40px;
+}
+
+#talkContainer {
+  position: relative;
+  display: inline-block;
 }
 
 button {
+  padding: 18px 40px;
   font-size: 20px;
-  padding: 15px 30px;
-  border-radius: 10px;
   border: none;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  background: #22c55e;
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
+  outline: none;
+  box-shadow: 0 0 12px #22c55e;
+  transition: box-shadow 0.3s ease;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+/* The glowing speaking ball animation */
+#speakingBall {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 4px solid #22c55e;
+  box-shadow: 0 0 30px 10px #22c55e;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 30px 10px #22c55e;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 0 50px 20px #22c55e;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    box-shadow: 0 0 30px 10px #22c55e;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+#speakingBall.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+#log {
+  margin-top: 30px;
+  font-size: 18px;
+  color: #38bdf8;
+  min-height: 24px;
 }
