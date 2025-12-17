@@ -2,30 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mini Alexa – Advanced</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Alexa with Speaking Animation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <h1>🎙️ Mini Alexa</h1>
 
-  <div class="app">
-    <h1>🎙 Mini Alexa</h1>
-    <p class="subtitle">Advanced Voice Assistant (GitHub Version)</p>
-
-    <button id="talkBtn">🎧 Talk</button>
-
-    <div class="status" id="status">
-      Status: Not Listening
-    </div>
-
-    <div class="log">
-      <h3>You said:</h3>
-      <p id="userText">—</p>
-
-      <h3>Assistant:</h3>
-      <p id="botText">—</p>
-    </div>
+  <div id="talkContainer">
+    <button id="talkBtn">TALK</button>
+    <div id="speakingBall"></div>
   </div>
+
+  <p id="log">Press TALK and speak</p>
 
   <script src="script.js"></script>
 </body>
