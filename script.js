@@ -1,51 +1,96 @@
 document.addEventListener("DOMContentLoaded", () => {
   const talkBtn = document.getElementById("talkBtn");
-  const speakingBall = document.getElementById("speakingBall");
   const log = document.getElementById("log");
 
   let recognition;
   let listening = false;
   let speaking = false;
 
-  // Speech Synthesis wrapper
+  // List of commands with keywords, reply (or function), and optional action
+  const commands = [
+    {
+      keys: ["hello", "hi", "hey"],
+      reply: "Hey there! How can I assist you today?",
+    },
+    {
+      keys: ["how are you", "how are you doing"],
+      reply: "I'm just code, but I'm doing great! Thanks for asking.",
+    },
+    {
+      keys: ["your name"],
+      reply: "I'm Mini Alexa, your voice assistant.",
+    },
+    {
+      keys: ["time"],
+      reply: () => `It's currently ${new Date().toLocaleTimeString()}.`,
+    },
+    {
+      keys: ["date"],
+      reply: () => `Today is ${new Date().toDateString()}.`,
+    },
+    {
+      keys: ["open google"],
+      reply: "Opening Google for you.",
+      action: () => window.open("https://google.com", "_blank"),
+    },
+    {
+      keys: ["open youtube"],
+      reply: "Opening YouTube.",
+      action: () => window.open("https://youtube.com", "_blank"),
+    },
+    {
+      keys: ["thank you", "thanks"],
+      reply: "You're welcome!",
+    },
+    {
+      keys: ["stop listening", "stop"],
+      reply: "Okay, I will stop listening now.",
+      stopListening: true,
+    },
+  ];
+
+  const fallbackReplies = [
+    "I didn't catch that, could you say it again?",
+    "Please try rephrasing that.",
+    "I'm still learning, tell me something else.",
+    "Sorry, I don't understand that yet.",
+  ];
+
   function speak(text) {
     return new Promise((resolve) => {
       speaking = true;
-      updateSpeakingAnimation();
+      updateButtonState();
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
 
-      // When speaking ends
       utterance.onend = () => {
         speaking = false;
-        updateSpeakingAnimation();
+        updateButtonState();
         resolve();
       };
 
-      // Cancel any current speech and speak new text
       speechSynthesis.cancel();
       speechSynthesis.speak(utterance);
     });
   }
 
-  // Show or hide speaking animation
-  function updateSpeakingAnimation() {
+  function updateButtonState() {
     if (speaking) {
-      speakingBall.classList.add("active");
       talkBtn.disabled = true;
-      talkBtn.style.cursor = "not-allowed";
+      talkBtn.textContent = "Speaking...";
+    } else if (listening) {
+      talkBtn.disabled = true;
+      talkBtn.textContent = "Listening...";
     } else {
-      speakingBall.classList.remove("active");
       talkBtn.disabled = false;
-      talkBtn.style.cursor = "pointer";
+      talkBtn.textContent = "Talk";
     }
   }
 
-  // Initialize Speech Recognition
   function initRecognition() {
     if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-      alert("Your browser does not support Speech Recognition");
+      alert("Speech Recognition is not supported in this browser.");
       return null;
     }
 
@@ -53,71 +98,92 @@ document.addEventListener("DOMContentLoaded", () => {
     const recog = new SpeechRecognition();
 
     recog.lang = "en-US";
-    recog.continuous = false; // single utterance, avoid confusion
+    recog.continuous = false; // We'll restart manually for better control
     recog.interimResults = false;
 
-    return recog;
-  }
-
-  // Start listening function
-  async function startListening() {
-    if (listening || speaking) return;
-
-    recognition = initRecognition();
-    if (!recognition) return;
-
-    listening = true;
-    log.textContent = "Listening... Speak now.";
-    recognition.start();
-
-    recognition.onresult = async (event) => {
-      let transcript = event.results[0][0].transcript.toLowerCase();
+    recog.onresult = async (event) => {
+      const transcript = event.results[0][0].transcript.toLowerCase();
       log.textContent = "You said: " + transcript;
 
       recognition.stop();
       listening = false;
+      updateButtonState();
 
       await processCommand(transcript);
+
+      // Restart listening after reply
+      if (!speaking) {
+        startListening();
+      }
     };
 
-    recognition.onerror = (event) => {
-      log.textContent = "Error occurred: " + event.error;
+    recog.onend = () => {
       listening = false;
+      updateButtonState();
+
+      // Auto-restart recognition unless speaking or stopped
+      if (!speaking && !stoppedByUser) {
+        startListening();
+      }
     };
 
-    recognition.onend = () => {
+    recog.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
       listening = false;
-      if (!speaking) log.textContent = "Press TALK and speak";
+      updateButtonState();
+
+      // Try restarting on some errors
+      if (event.error === "no-speech" || event.error === "aborted") {
+        if (!stoppedByUser) startListening();
+      }
     };
+
+    return recog;
   }
 
-  // Handle recognized text
+  let stoppedByUser = false;
+
   async function processCommand(text) {
-    if (text.includes("hello") || text.includes("hi")) {
-      await speak("Hello! How can I help you?");
-    } else if (text.includes("time")) {
-      const now = new Date();
-      await speak(`The time is ${now.toLocaleTimeString()}`);
-    } else if (text.includes("date")) {
-      const today = new Date();
-      await speak(`Today is ${today.toDateString()}`);
-    } else if (text.includes("open google")) {
-      await speak("Opening Google for you");
-      window.open("https://google.com", "_blank");
-    } else if (text.includes("open youtube")) {
-      await speak("Opening YouTube for you");
-      window.open("https://youtube.com", "_blank");
-    } else if (text.includes("stop") || text.includes("bye")) {
-      await speak("Goodbye!");
-    } else {
-      await speak("I did not understand that. Please try again.");
+    for (const cmd of commands) {
+      for (const key of cmd.keys) {
+        if (text.includes(key)) {
+          const reply = typeof cmd.reply === "function" ? cmd.reply() : cmd.reply;
+          await speak(reply);
+          if (cmd.action) cmd.action();
+          if (cmd.stopListening) {
+            stoppedByUser = true;
+            recognition.stop();
+            listening = false;
+            updateButtonState();
+          }
+          return;
+        }
+      }
     }
-
-    log.textContent = "Press TALK and speak";
+    // Fallback reply
+    const fallback = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+    await speak(fallback);
   }
 
-  // Button click
+  function startListening() {
+    if (listening || speaking) return;
+    stoppedByUser = false;
+
+    if (!recognition) recognition = initRecognition();
+    if (!recognition) return;
+
+    recognition.start();
+    listening = true;
+    updateButtonState();
+    log.textContent = "Listening... Speak now.";
+  }
+
   talkBtn.addEventListener("click", () => {
-    startListening();
+    if (!listening && !speaking) {
+      startListening();
+    }
   });
+
+  // Initial button state
+  updateButtonState();
 });
