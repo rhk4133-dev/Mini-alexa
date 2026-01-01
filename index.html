@@ -1,19 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Nova Assistant</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Gemini JS Demo</title>
 </head>
 <body>
 
-  <canvas id="particles"></canvas>
+  <h2>Gemini Assistant</h2>
 
-  <div class="orb-wrapper">
-    <div class="orb"></div>
-  </div>
+  <input id="input" placeholder="Ask something..." />
+  <button onclick="askGemini()">Ask</button>
 
-  <div id="status">Listening...</div>
+  <pre id="output"></pre>
 
   <script src="script.js"></script>
 </body>
