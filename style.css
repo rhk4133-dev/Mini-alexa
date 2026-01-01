@@ -1,196 +1,52 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const talkBtn = document.getElementById("talkBtn");
-  const speakingBall = document.getElementById("speakingBall");
-  const log = document.getElementById("log");
+body {
+  margin: 0;
+  background: radial-gradient(circle at center, #050b1e, #000);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: Arial, sans-serif;
+}
 
-  let recognition;
-  let listening = false;
-  let speaking = false;
-  let stoppedByUser = false;
+.orb-container {
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  // Command set with keywords, replies, and optional actions
-  const commands = [
-    {
-      keys: ["hello", "hi", "hey"],
-      reply: "Hello! How can I assist you today?",
-    },
-    {
-      keys: ["what is your name", "your name"],
-      reply: "I'm Mini Alexa, your personal assistant.",
-    },
-    {
-      keys: ["what are you doing", "what are you up to"],
-      reply: "I'm here listening and ready to help you.",
-    },
-    {
-      keys: ["how are you", "how are you doing"],
-      reply: "I am just code, but I am doing great!",
-    },
-    {
-      keys: ["time", "current time"],
-      reply: () => `The current time is ${new Date().toLocaleTimeString()}.`,
-    },
-    {
-      keys: ["date", "today's date"],
-      reply: () => `Today is ${new Date().toDateString()}.`,
-    },
-    {
-      keys: ["open google"],
-      reply: "Opening Google for you.",
-      action: () => window.open("https://google.com", "_blank"),
-    },
-    {
-      keys: ["open youtube"],
-      reply: "Opening YouTube for you.",
-      action: () => window.open("https://youtube.com", "_blank"),
-    },
-    {
-      keys: ["thank you", "thanks"],
-      reply: "You’re welcome!",
-    },
-    {
-      keys: ["stop listening", "stop"],
-      reply: "Okay, stopping now. Say TALK to start again.",
-      stopListening: true,
-    },
-  ];
+.orb {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #aefcff, #1e90ff, #001f3f);
+  animation: float 3s ease-in-out infinite, glow 2s alternate infinite;
+  box-shadow: 0 0 40px #4fdcff;
+}
 
-  const fallbackReplies = [
-    "Sorry, I didn't catch that. Could you say it again?",
-    "Please try rephrasing your question.",
-    "I'm still learning, please ask something else.",
-    "I don't understand that yet, try another question.",
-  ];
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0); }
+}
 
-  function updateSpeakingAnimation() {
-    if (speaking) {
-      speakingBall.classList.add("active");
-      talkBtn.disabled = true;
-      talkBtn.textContent = "Speaking...";
-      talkBtn.style.cursor = "not-allowed";
-    } else if (listening) {
-      speakingBall.classList.remove("active");
-      talkBtn.disabled = true;
-      talkBtn.textContent = "Listening...";
-      talkBtn.style.cursor = "wait";
-    } else {
-      speakingBall.classList.remove("active");
-      talkBtn.disabled = false;
-      talkBtn.textContent = "TALK";
-      talkBtn.style.cursor = "pointer";
-    }
-  }
+@keyframes glow {
+  from { box-shadow: 0 0 20px #7fdfff; }
+  to { box-shadow: 0 0 60px #00eaff; }
+}
 
-  // Speech synthesis wrapper, returns Promise so we can await it
-  function speak(text) {
-    return new Promise((resolve) => {
-      speaking = true;
-      updateSpeakingAnimation();
+#status {
+  margin-top: 20px;
+  font-size: 18px;
+  opacity: 0.8;
+}
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-
-      utterance.onend = () => {
-        speaking = false;
-        updateSpeakingAnimation();
-        resolve();
-      };
-
-      speechSynthesis.cancel(); // stop any ongoing speech
-      speechSynthesis.speak(utterance);
-    });
-  }
-
-  function initRecognition() {
-    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-      alert("Speech Recognition not supported in this browser");
-      return null;
-    }
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recog = new SpeechRecognition();
-
-    recog.lang = "en-US";
-    recog.continuous = false; // Single phrase recognition per start
-    recog.interimResults = false;
-
-    recog.onresult = async (event) => {
-      const transcript = event.results[0][0].transcript.toLowerCase();
-      log.textContent = "You said: " + transcript;
-
-      recognition.stop();
-      listening = false;
-      updateSpeakingAnimation();
-
-      await handleCommand(transcript);
-
-      if (!speaking && !stoppedByUser) {
-        startListening(); // auto-restart listening after response
-      }
-    };
-
-    recog.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
-      listening = false;
-      updateSpeakingAnimation();
-
-      if (!stoppedByUser) {
-        startListening();
-      }
-    };
-
-    recog.onend = () => {
-      listening = false;
-      updateSpeakingAnimation();
-
-      if (!speaking && !stoppedByUser) {
-        startListening();
-      }
-    };
-
-    return recog;
-  }
-
-  async function handleCommand(text) {
-    for (const cmd of commands) {
-      for (const key of cmd.keys) {
-        if (text.includes(key)) {
-          const reply = typeof cmd.reply === "function" ? cmd.reply() : cmd.reply;
-          await speak(reply);
-          if (cmd.action) cmd.action();
-          if (cmd.stopListening) {
-            stoppedByUser = true;
-            recognition.stop();
-            listening = false;
-            updateSpeakingAnimation();
-          }
-          return;
-        }
-      }
-    }
-    // Fallback
-    const fallback = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
-    await speak(fallback);
-  }
-
-  function startListening() {
-    if (listening || speaking) return;
-
-    stoppedByUser = false;
-    if (!recognition) recognition = initRecognition();
-    if (!recognition) return;
-
-    recognition.start();
-    listening = true;
-    updateSpeakingAnimation();
-    log.textContent = "Listening... Speak now.";
-  }
-
-  // Button click handler
-  talkBtn.addEventListener("click", () => {
-    if (!listening && !speaking) {
-      startListening();
-    }
-  });
-
-  updateSpeakingAnimation();
-});
+video {
+  margin-top: 20px;
+  width: 280px;
+  border-radius: 12px;
+  border: 2px solid #2aa9ff;
+}
