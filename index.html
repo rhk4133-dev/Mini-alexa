@@ -2,19 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mini Alexa Conversation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Alexa</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>🎙️ Mini Alexa</h1>
 
-  <div id="talkContainer">
-    <button id="talkBtn">TALK</button>
-    <div id="speakingBall"></div>
+  <div class="orb-container">
+    <div class="orb"></div>
   </div>
 
-  <p id="log">Press TALK and speak</p>
+  <p id="status">Listening...</p>
+
+  <video id="camera" autoplay playsinline></video>
 
   <script src="script.js"></script>
 </body>
