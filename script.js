@@ -1,142 +1,76 @@
-/* ===============================
-   PARTICLE SYSTEM
-================================ */
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
+const songs = [
+    { name: "DIL LAGANA MANATHA", file: "song1.mp3", image: "img1.jpg" },
+    { name: "KAGADADA DONIYALLI", file: "song2.mp3", image: "img2.jpg" },
+    { name: "KANAVE KANAVE", file: "song3.mp3", image: "img3.jpg" },
+    { name: "KANTHARA THE PART 2", file: "song4.mp3", image: "img4.jpg" },
+    { name: "ZARA ZARA", file: "song5.mp3", image: "img5.jpg" }
+];
 
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
+const audio = document.getElementById("audio");
+const cd = document.getElementById("cd");
+const title = document.getElementById("title");
+const progress = document.getElementById("progress");
+const playBtn = document.getElementById("playBtn");
 
-let particles = [];
+let currentSong = 0;
+let isPlaying = false;
 
-for (let i = 0; i < 120; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2 + 1,
-    vx: (Math.random() - 0.5) * 0.6,
-    vy: (Math.random() - 0.5) * 0.6
-  });
-}
-
-function animateParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  for (let p of particles) {
-    p.x += p.vx;
-    p.y += p.vy;
-
-    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(120,200,255,0.8)";
-    ctx.fill();
-  }
-
-  requestAnimationFrame(animateParticles);
-}
-animateParticles();
-
-/* ===============================
-   SPEECH + AI
-================================ */
-const statusText = document.getElementById("status");
-
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
-const recognition = new SpeechRecognition();
-recognition.continuous = true;
-recognition.lang = "en-US";
-
-let speaking = false;
-
-/* 🔴 INSERT YOUR API KEY HERE */
-const OPENAI_API_KEY = "AIzaSyAwlOx7do3D4ICerT1TXSuJaR9vNH7Hg_4";
-
-/* SPEAK */
-function speak(text) {
-  speaking = true;
-  recognition.stop();
-
-  statusText.textContent = "Speaking...";
-
-  const msg = new SpeechSynthesisUtterance(text);
-  msg.volume = 1;
-  msg.rate = 1;
-  msg.pitch = 1;
-
-  msg.onend = () => {
-    speaking = false;
-    statusText.textContent = "Listening...";
-    recognition.start();
-  };
-
-  speechSynthesis.speak(msg);
+function loadSong(index) {
+    currentSong = index;
+    audio.src = songs[index].file;
+    document.body.style.backgroundImage = `url(${songs[index].image})`;
+    cd.src = songs[index].image;
+    title.innerText = songs[index].name;
+    playSong();
 }
 
-/* CHATGPT REQUEST */
-async function askAI(prompt) {
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: "You are a helpful futuristic voice assistant." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7
-      })
-    });
-
-    const data = await res.json();
-    return data.choices[0].message.content;
-  } catch (err) {
-    return "I am having trouble connecting to my brain right now.";
-  }
+function playSong() {
+    audio.play();
+    cd.style.animationPlayState = "running";
+    playBtn.innerText = "⏸";
+    isPlaying = true;
 }
 
-/* COMMAND HANDLER */
-async function handleCommand(text) {
-  text = text.toLowerCase();
+function togglePlay() {
+    if (!audio.src) {
+        loadSong(0);
+        return;
+    }
 
-  if (text.includes("stop listening")) {
-    speak("Okay. I will pause.");
-    return;
-  }
+    if (isPlaying) {
+        audio.pause();
+        cd.style.animationPlayState = "paused";
+        playBtn.innerText = "▶";
+    } else {
+        playSong();
+    }
 
-  statusText.textContent = "Thinking...";
-  const reply = await askAI(text);
-  speak(reply);
+    isPlaying = !isPlaying;
 }
 
-/* LISTEN */
-recognition.onresult = (e) => {
-  if (speaking) return;
+function nextSong() {
+    currentSong = (currentSong + 1) % songs.length;
+    loadSong(currentSong);
+}
 
-  const transcript = e.results[e.results.length - 1][0].transcript;
-  statusText.textContent = "You said: " + transcript;
+function prevSong() {
+    currentSong = (currentSong - 1 + songs.length) % songs.length;
+    loadSong(currentSong);
+}
 
-  handleCommand(transcript);
-};
+/* Progress bar update */
+audio.addEventListener("timeupdate", () => {
+    if (audio.duration) {
+        progress.style.width = (audio.currentTime / audio.duration) * 100 + "%";
+    }
+});
 
-recognition.onend = () => {
-  if (!speaking) recognition.start();
-};
+/* Click progress bar */
+function setProgress(e) {
+    const width = e.currentTarget.clientWidth;
+    const clickX = e.offsetX;
+    audio.currentTime = (clickX / width) * audio.duration;
+}
 
-recognition.onerror = () => {
-  if (!speaking) recognition.start();
-};
-
-recognition.start();
+/* Auto next */
+audio.addEventListener("ended", nextSong);
