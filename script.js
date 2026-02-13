@@ -10,92 +10,94 @@ let songs = [
 "rUeyfai1ddc","FCDAnPFJUPA","AN8-o7ckg6k"
 ];
 
-let currentIndex = 0;
+let currentIndex=0;
 let player;
-let repeat = 0; // 0 off, 1 all, 2 one
+let repeat=0;
 
-const list = document.getElementById("songList");
-const cover = document.getElementById("cover");
-const title = document.getElementById("title");
-const loader = document.getElementById("loader");
+const list=document.getElementById("songList");
+const cover=document.getElementById("cover");
+const title=document.getElementById("title");
+const miniCover=document.getElementById("miniCover");
+const miniTitle=document.getElementById("miniTitle");
+const loader=document.getElementById("loader");
 
 songs.forEach((id,index)=>{
-    const card = document.createElement("div");
-    card.className="song-card";
-    card.innerHTML=`
+  const card=document.createElement("div");
+  card.className="song-card";
+  card.innerHTML=`
     <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
     <p>Song ${index+1}</p>
-    `;
-    card.onclick=()=>playSong(index);
-    list.appendChild(card);
+  `;
+  card.onclick=()=>playSong(index);
+  list.appendChild(card);
 });
 
 function onYouTubeIframeAPIReady(){
-    player = new YT.Player('youtubePlayer',{
-        height:'0',
-        width:'0',
-        videoId:songs[0],
-        playerVars:{controls:0},
-        events:{
-            'onStateChange':onStateChange
-        }
-    });
+  player=new YT.Player('youtubePlayer',{
+    height:'0',
+    width:'0',
+    videoId:songs[0],
+    playerVars:{controls:0},
+    events:{'onStateChange':onStateChange}
+  });
 }
 
 function playSong(index){
-    loader.style.display="flex";
-    currentIndex=index;
-    player.loadVideoById(songs[index]);
-    cover.src=`https://img.youtube.com/vi/${songs[index]}/hqdefault.jpg`;
-    title.innerText="Song "+(index+1);
+  loader.style.display="flex";
+  currentIndex=index;
+  player.loadVideoById(songs[index]);
+
+  let img=`https://img.youtube.com/vi/${songs[index]}/hqdefault.jpg`;
+  cover.src=img;
+  miniCover.src=img;
+  title.innerText="Song "+(index+1);
+  miniTitle.innerText="Song "+(index+1);
 }
 
 function onStateChange(event){
-    if(event.data==YT.PlayerState.PLAYING){
-        loader.style.display="none";
-        document.getElementById("playBtn").innerText="⏸";
-    }
-    if(event.data==YT.PlayerState.ENDED){
-        if(repeat==2){
-            playSong(currentIndex);
-        }else if(repeat==1){
-            nextSong();
-        }
-    }
+  if(event.data==YT.PlayerState.PLAYING){
+    loader.style.display="none";
+    document.getElementById("playBtn").innerText="⏸";
+    document.getElementById("miniPlay").innerText="⏸";
+  }
 }
 
 function togglePlay(){
-    if(player.getPlayerState()==1){
-        player.pauseVideo();
-        document.getElementById("playBtn").innerText="▶";
-    }else{
-        player.playVideo();
-        document.getElementById("playBtn").innerText="⏸";
-    }
+  if(player.getPlayerState()==1){
+    player.pauseVideo();
+    document.getElementById("playBtn").innerText="▶";
+    document.getElementById("miniPlay").innerText="▶";
+  }else{
+    player.playVideo();
+    document.getElementById("playBtn").innerText="⏸";
+    document.getElementById("miniPlay").innerText="⏸";
+  }
 }
 
 function nextSong(){
-    currentIndex=(currentIndex+1)%songs.length;
-    playSong(currentIndex);
+  currentIndex=(currentIndex+1)%songs.length;
+  playSong(currentIndex);
 }
 
 function prevSong(){
-    currentIndex=(currentIndex-1+songs.length)%songs.length;
-    playSong(currentIndex);
+  currentIndex=(currentIndex-1+songs.length)%songs.length;
+  playSong(currentIndex);
 }
 
 function shuffleSongs(){
-    songs.sort(()=>Math.random()-0.5);
-    alert("Playlist Shuffled 🔀");
+  songs.sort(()=>Math.random()-0.5);
+  alert("Playlist Shuffled 🔀");
 }
 
 function repeatMode(){
-    repeat=(repeat+1)%3;
-    if(repeat==0) alert("Repeat Off");
-    if(repeat==1) alert("Repeat All");
-    if(repeat==2) alert("Repeat One");
+  repeat=(repeat+1)%3;
+  alert("Repeat Mode: "+repeat);
 }
 
-function toggleTheme(){
-    document.body.classList.toggle("light");
+function openPlayer(){
+  document.getElementById("fullPlayer").classList.add("active");
+}
+
+function closePlayer(){
+  document.getElementById("fullPlayer").classList.remove("active");
 }
