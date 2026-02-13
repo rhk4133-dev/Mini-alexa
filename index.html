@@ -1,65 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RHK Music Premium</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RHK Music Premium</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Floating Music Notes -->
-<div class="music-bg">
-    <span>🎵</span>
-    <span>🎶</span>
-    <span>🎧</span>
-    <span>🎼</span>
-    <span>🎵</span>
-</div>
-
-<!-- HOME PAGE -->
 <div id="homePage" class="home">
     <div class="hero-card">
-        <h1 class="logo">RHK MUSIC</h1>
-        <p class="tagline">Feel The Premium Sound Experience</p>
-        <button onclick="enterApp()" class="enter-btn">ENTER MUSIC</button>
+        <h1>RHK MUSIC</h1>
+        <button onclick="enterApp()">ENTER MUSIC</button>
     </div>
 </div>
 
-<!-- MUSIC APP -->
-<div id="musicApp" class="app" style="display:none;">
-    <h2 class="app-title">🔥 RHK MUSIC PREMIUM 🔥</h2>
-    <input type="text" id="searchBar" placeholder="Search RHK song..." onkeyup="searchSong()">
-    <div class="song-grid" id="songGrid"></div>
+<div id="app" class="app" style="display:none;">
 
-    <!-- PLAYER -->
-    <div id="playerView" class="player-view" style="display:none;">
-        <div class="overlay"></div>
-        <div class="center-player">
-            <div class="cd" id="cd"></div>
-            <h2 id="nowTitle"></h2>
-
-            <!-- Slide Preview -->
-            <div class="slide-preview">
-                <div class="side-song" id="prevTitle"></div>
-                <div class="current-song" id="currentTitle"></div>
-                <div class="side-song" id="nextTitle"></div>
-            </div>
-
-            <div class="player-controls">
-                <button onclick="prevSong()">⏮</button>
-                <button onclick="minus10()">⏪ 10s</button>
-                <button onclick="togglePlay()" id="playBtn">⏸</button>
-                <button onclick="plus10()">10s ⏩</button>
-                <button onclick="nextSong()">⏭</button>
-            </div>
-
-            <p class="brand-watermark">RHK MUSIC</p>
-            <button onclick="goBack()" class="back-btn">⬅ Back</button>
-        </div>
+    <div class="sidebar">
+        <h2>RHK MUSIC</h2>
+        <button onclick="toggleTheme()">🌙 / ☀</button>
     </div>
 
-    <!-- Hidden YouTube Player -->
-    <div id="youtubePlayer" style="display:none;"></div>
+    <div class="main">
+        <input type="text" id="search" placeholder="Search..." onkeyup="searchSong()">
+        <div id="songGrid" class="grid"></div>
+    </div>
+
+    <!-- MINI PLAYER -->
+    <div class="player">
+        <img id="thumb">
+        <div class="info">
+            <h4 id="title"></h4>
+            <div class="equalizer">
+                <span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="toggleShuffle()">🔀</button>
+            <button onclick="prevSong()">⏮</button>
+            <button onclick="togglePlay()" id="playBtn">▶</button>
+            <button onclick="nextSong()">⏭</button>
+            <button onclick="toggleRepeat()">🔁</button>
+        </div>
+
+        <input type="range" id="progress" value="0">
+    </div>
+
+    <div id="loader" class="loader">Loading...</div>
+    <div id="youtubePlayer"></div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
