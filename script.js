@@ -1,76 +1,127 @@
-const songs = [
-    { name: "DIL LAGANA MANATHA", file: "song1.mp3", image: "img1.jpg" },
-    { name: "KAGADADA DONIYALLI", file: "song2.mp3", image: "img2.jpg" },
-    { name: "KANAVE KANAVE", file: "song3.mp3", image: "img3.jpg" },
-    { name: "KANTHARA THE PART 2", file: "song4.mp3", image: "img4.jpg" },
-    { name: "ZARA ZARA", file: "song5.mp3", image: "img5.jpg" }
+// ------------------------------
+// 5 YouTube Songs
+// ------------------------------
+let songs = [
+    { name: "Song 1", file: "45ZXIpC53tY", img: "img1.jpg" },
+    { name: "Song 2", file: "05h-b8yOwwE", img: "img2.jpg" },
+    { name: "Song 3", file: "WbSV889CwBc", img: "img3.jpg" },
+    { name: "Song 4", file: "yMNm6XAxduU", img: "img4.jpg" },
+    { name: "Song 5", file: "7uFWC5xNnYQ", img: "img5.jpg" }
 ];
 
-const audio = document.getElementById("audio");
+// DOM Elements
+const songGrid = document.getElementById("songGrid");
+const playerView = document.getElementById("playerView");
 const cd = document.getElementById("cd");
-const title = document.getElementById("title");
-const progress = document.getElementById("progress");
-const playBtn = document.getElementById("playBtn");
+const nowTitle = document.getElementById("nowTitle");
+const prevTitle = document.getElementById("prevTitle");
+const currentTitle = document.getElementById("currentTitle");
+const nextTitle = document.getElementById("nextTitle");
 
-let currentSong = 0;
-let isPlaying = false;
+let currentIndex = 0;
+let player;
 
-function loadSong(index) {
-    currentSong = index;
-    audio.src = songs[index].file;
-    document.body.style.backgroundImage = `url(${songs[index].image})`;
-    cd.src = songs[index].image;
-    title.innerText = songs[index].name;
-    playSong();
+// ENTER MUSIC APP
+function enterApp(){
+    document.getElementById("homePage").style.display="none";
+    document.getElementById("musicApp").style.display="block";
 }
 
-function playSong() {
-    audio.play();
-    cd.style.animationPlayState = "running";
-    playBtn.innerText = "⏸";
-    isPlaying = true;
-}
-
-function togglePlay() {
-    if (!audio.src) {
-        loadSong(0);
-        return;
-    }
-
-    if (isPlaying) {
-        audio.pause();
-        cd.style.animationPlayState = "paused";
-        playBtn.innerText = "▶";
-    } else {
-        playSong();
-    }
-
-    isPlaying = !isPlaying;
-}
-
-function nextSong() {
-    currentSong = (currentSong + 1) % songs.length;
-    loadSong(currentSong);
-}
-
-function prevSong() {
-    currentSong = (currentSong - 1 + songs.length) % songs.length;
-    loadSong(currentSong);
-}
-
-/* Progress bar update */
-audio.addEventListener("timeupdate", () => {
-    if (audio.duration) {
-        progress.style.width = (audio.currentTime / audio.duration) * 100 + "%";
-    }
+// CREATE SONG GRID
+songs.forEach((song,index)=>{
+    const card = document.createElement("div");
+    card.className = "song-card";
+    card.innerHTML = `<img src="${song.img}"><h3>${song.name}</h3>`;
+    card.onclick = ()=> playSong(index);
+    songGrid.appendChild(card);
 });
 
-/* Click progress bar */
-function setProgress(e) {
-    const width = e.currentTarget.clientWidth;
-    const clickX = e.offsetX;
-    audio.currentTime = (clickX / width) * audio.duration;
+// UPDATE SLIDE TITLES
+function updateSlideTitles(){
+    let prevIndex = (currentIndex-1+songs.length)%songs.length;
+    let nextIndex = (currentIndex+1)%songs.length;
+    prevTitle.innerText = songs[prevIndex].name;
+    currentTitle.innerText = songs[currentIndex].name;
+    nextTitle.innerText = songs[nextIndex].name;
 }
 
-/* Auto next */
-audio.addEventListener("ended", nextSong);
+// YouTube IFrame API
+function onYouTubeIframeAPIReady(){
+    player = new YT.Player('youtubePlayer', {
+        height: '0',
+        width: '0',
+        videoId: songs[0].file,
+        playerVars: {
+            autoplay: 0,
+            controls: 0,
+            disablekb: 1,
+            modestbranding: 1,
+            rel: 0
+        },
+        events: {
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerStateChange(event){
+    if(event.data === YT.PlayerState.ENDED) nextSong();
+}
+
+// PLAY SONG (Only YouTube)
+function playSong(index){
+    currentIndex = index;
+    const song = songs[index];
+
+    if(player) player.loadVideoById(song.file);
+
+    nowTitle.innerText = song.name;
+    cd.style.backgroundImage = `url('${song.img}')`;
+    cd.classList.add("playing");
+    playerView.style.display = "flex";
+    updateSlideTitles();
+}
+
+// PLAY / PAUSE
+function togglePlay(){
+    if(!player) return;
+    const state = player.getPlayerState();
+    if(state === YT.PlayerState.PLAYING){
+        player.pauseVideo();
+        cd.classList.remove("playing");
+        document.getElementById("playBtn").innerText="▶";
+    } else {
+        player.playVideo();
+        cd.classList.add("playing");
+        document.getElementById("playBtn").innerText="⏸";
+    }
+}
+
+// NEXT / PREV SONG
+function nextSong(){
+    currentIndex = (currentIndex+1)%songs.length;
+    playSong(currentIndex);
+}
+function prevSong(){
+    currentIndex = (currentIndex-1+songs.length)%songs.length;
+    playSong(currentIndex);
+}
+
+// SKIP 10s
+function plus10(){ if(player) player.seekTo(player.getCurrentTime()+10,true); }
+function minus10(){ if(player) player.seekTo(player.getCurrentTime()-10,true); }
+
+// GO BACK TO GRID
+function goBack(){
+    playerView.style.display="none";
+    player?.pauseVideo();
+    cd.classList.remove("playing");
+}
+
+// SEARCH SONG
+function searchSong(){
+    const input = document.getElementById("searchBar").value.toLowerCase();
+    document.querySelectorAll(".song-card").forEach(card=>{
+        card.style.display = card.innerText.toLowerCase().includes(input)?"block":"none";
+    });
+}
