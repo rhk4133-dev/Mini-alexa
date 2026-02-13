@@ -1,54 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RHK Music Pro</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.youtube.com/iframe_api"></script>
+  <title>RHK Music</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-<div class="app">
+<header>
+  <h1>🎵 RHK MUSIC</h1>
+</header>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h1 class="logo">🎵 RHK MUSIC</h1>
-        <button onclick="toggleTheme()" class="theme-btn">🌙 Toggle Theme</button>
-    </div>
+<div class="playlist" id="songList"></div>
 
-    <!-- Main Content -->
-    <div class="main">
-
-        <h2>Trending Playlist</h2>
-
-        <div id="songList" class="song-list"></div>
-
-    </div>
-
+<!-- Mini Player -->
+<div class="mini-player" onclick="openPlayer()">
+  <img id="miniCover">
+  <div>
+    <p id="miniTitle">Select Song</p>
+  </div>
+  <button id="miniPlay">▶</button>
 </div>
 
-<!-- Bottom Player -->
-<div class="player">
+<!-- Full Player -->
+<div class="full-player" id="fullPlayer">
 
-    <div class="song-info">
-        <img id="cover">
-        <div>
-            <h4 id="title">Select a song</h4>
-        </div>
-    </div>
+  <div class="player-content">
+
+    <img id="cover" class="cover">
+
+    <h2 id="title"></h2>
 
     <div class="controls">
-        <button onclick="shuffleSongs()">🔀</button>
-        <button onclick="prevSong()">⏮</button>
-        <button onclick="togglePlay()" id="playBtn">▶</button>
-        <button onclick="nextSong()">⏭</button>
-        <button onclick="repeatMode()">🔁</button>
+      <button onclick="shuffleSongs()">🔀</button>
+      <button onclick="prevSong()">⏮</button>
+      <button onclick="togglePlay()" id="playBtn">▶</button>
+      <button onclick="nextSong()">⏭</button>
+      <button onclick="repeatMode()">🔁</button>
     </div>
+
+    <button class="close-btn" onclick="closePlayer()">⬇ Close</button>
+
+  </div>
 
 </div>
 
 <div id="loader" class="loader">Loading...</div>
-
 <div id="youtubePlayer"></div>
 
 <script src="script.js"></script>
