@@ -1,58 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RHK Music Premium</title>
-<link rel="stylesheet" href="style.css">
+    <title>RHK Music Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-<div id="homePage" class="home">
-    <div class="hero-card">
-        <h1>RHK MUSIC</h1>
-        <button onclick="enterApp()">ENTER MUSIC</button>
-    </div>
-</div>
+<div class="app">
 
-<div id="app" class="app" style="display:none;">
-
+    <!-- Sidebar -->
     <div class="sidebar">
-        <h2>RHK MUSIC</h2>
-        <button onclick="toggleTheme()">🌙 / ☀</button>
+        <h1 class="logo">🎵 RHK MUSIC</h1>
+        <button onclick="toggleTheme()" class="theme-btn">🌙 Toggle Theme</button>
     </div>
 
+    <!-- Main Content -->
     <div class="main">
-        <input type="text" id="search" placeholder="Search..." onkeyup="searchSong()">
-        <div id="songGrid" class="grid"></div>
+
+        <h2>Trending Playlist</h2>
+
+        <div id="songList" class="song-list"></div>
+
     </div>
 
-    <!-- MINI PLAYER -->
-    <div class="player">
-        <img id="thumb">
-        <div class="info">
-            <h4 id="title"></h4>
-            <div class="equalizer">
-                <span></span><span></span><span></span><span></span>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button onclick="toggleShuffle()">🔀</button>
-            <button onclick="prevSong()">⏮</button>
-            <button onclick="togglePlay()" id="playBtn">▶</button>
-            <button onclick="nextSong()">⏭</button>
-            <button onclick="toggleRepeat()">🔁</button>
-        </div>
-
-        <input type="range" id="progress" value="0">
-    </div>
-
-    <div id="loader" class="loader">Loading...</div>
-    <div id="youtubePlayer"></div>
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
+<!-- Bottom Player -->
+<div class="player">
+
+    <div class="song-info">
+        <img id="cover">
+        <div>
+            <h4 id="title">Select a song</h4>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="shuffleSongs()">🔀</button>
+        <button onclick="prevSong()">⏮</button>
+        <button onclick="togglePlay()" id="playBtn">▶</button>
+        <button onclick="nextSong()">⏭</button>
+        <button onclick="repeatMode()">🔁</button>
+    </div>
+
+</div>
+
+<div id="loader" class="loader">Loading...</div>
+
+<div id="youtubePlayer"></div>
+
 <script src="script.js"></script>
 </body>
 </html>
