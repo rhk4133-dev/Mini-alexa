@@ -1,14 +1,11 @@
-let songs = [
+let songs=[
 "h13lbNkUaEg","sf7VoyW_5ro","EtGh9oC2SZ0","yh3C2JU-m_Y",
 "1PxT9i4-uTc","Q-_cu_78eIA","0pVMxbQh-Lc","NeXbmEnpSz0",
-"palMj0iq-3g","LbrJZgyqp5w","vipdDXKHT_0","ElIizBi-rEc",
-"DL8BsPDe4ck","N5BmQz4AmFI","CQSzGF9VAak","pPGcYXZhCPY",
-"YjoKyFJf4CU","aorAeMA06i0","vmu53OX935A","wc-pzBaSiPA",
-"PMzTLWTWLZU","g5O5ufz8w34","5Eqb_-j3FDA","uXgzCjAv-9k",
-"Zu6z3qUPu1s","sX4Bxks_VlI","hoNb6HuNmU0","LK7-_dgAVQE",
-"Pm7sWFzcPes","yu8nxs1gw48","wiur_AGatGU","LAdp3ZHeP4Q",
-"rUeyfai1ddc","FCDAnPFJUPA","AN8-o7ckg6k"
+"palMj0iq-3g","LbrJZgyqp5w","vipdDXKHT_0","ElIizBi-rEc"
 ];
+
+// ADD MORE LIKE THIS:
+// songs.push("VIDEO_ID");
 
 let currentIndex=0;
 let player;
@@ -21,16 +18,21 @@ const miniCover=document.getElementById("miniCover");
 const miniTitle=document.getElementById("miniTitle");
 const loader=document.getElementById("loader");
 
-songs.forEach((id,index)=>{
-  const card=document.createElement("div");
-  card.className="song-card";
-  card.innerHTML=`
-    <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
-    <p>Song ${index+1}</p>
-  `;
-  card.onclick=()=>playSong(index);
-  list.appendChild(card);
-});
+function createPlaylist(){
+  list.innerHTML="";
+  songs.forEach((id,index)=>{
+    const card=document.createElement("div");
+    card.className="song-card";
+    card.innerHTML=`
+      <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
+      <p>Song ${index+1}</p>
+    `;
+    card.onclick=()=>playSong(index);
+    list.appendChild(card);
+  });
+}
+
+createPlaylist();
 
 function onYouTubeIframeAPIReady(){
   player=new YT.Player('youtubePlayer',{
@@ -52,6 +54,8 @@ function playSong(index){
   miniCover.src=img;
   title.innerText="Song "+(index+1);
   miniTitle.innerText="Song "+(index+1);
+
+  openPlayer();
 }
 
 function onStateChange(event){
@@ -86,6 +90,7 @@ function prevSong(){
 
 function shuffleSongs(){
   songs.sort(()=>Math.random()-0.5);
+  createPlaylist();
   alert("Playlist Shuffled 🔀");
 }
 
@@ -101,3 +106,31 @@ function openPlayer(){
 function closePlayer(){
   document.getElementById("fullPlayer").classList.remove("active");
 }
+
+/* Search */
+document.getElementById("searchBar").addEventListener("input",function(){
+  let value=this.value.toLowerCase();
+  let cards=document.querySelectorAll(".song-card");
+
+  cards.forEach((card,index)=>{
+    if(("song "+(index+1)).toLowerCase().includes(value)){
+      card.style.display="flex";
+    }else{
+      card.style.display="none";
+    }
+  });
+});
+
+/* Swipe */
+let touchStartX=0;
+let touchEndX=0;
+
+document.getElementById("fullPlayer").addEventListener("touchstart",e=>{
+  touchStartX=e.changedTouches[0].screenX;
+});
+
+document.getElementById("fullPlayer").addEventListener("touchend",e=>{
+  touchEndX=e.changedTouches[0].screenX;
+  if(touchEndX < touchStartX-50) nextSong();
+  if(touchEndX > touchStartX+50) prevSong();
+});
