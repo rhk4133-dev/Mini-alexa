@@ -1,127 +1,101 @@
-// ------------------------------
-// 5 YouTube Songs
-// ------------------------------
-let songs = [
-    { name: "Song 1", file: "45ZXIpC53tY", img: "img1.jpg" },
-    { name: "Song 2", file: "05h-b8yOwwE", img: "img2.jpg" },
-    { name: "Song 3", file: "WbSV889CwBc", img: "img3.jpg" },
-    { name: "Song 4", file: "yMNm6XAxduU", img: "img4.jpg" },
-    { name: "Song 5", file: "7uFWC5xNnYQ", img: "img5.jpg" }
+const rawSongs = [
+"h13lbNkUaEg","sf7VoyW_5ro","EtGh9oC2SZ0","yh3C2JU-m_Y",
+"1PxT9i4-uTc","Q-_cu_78eIA","0pVMxbQh-Lc","NeXbmEnpSz0",
+"palMj0iq-3g","LbrJZgyqp5w","vipdDXKHT_0","ElIizBi-rEc",
+"DL8BsPDe4ck","N5BmQz4AmFI","CQSzGF9VAak","pPGcYXZhCPY",
+"YjoKyFJf4CU","aorAeMA06i0","vmu53OX935A","wc-pzBaSiPA",
+"PMzTLWTWLZU","g5O5ufz8w34","5Eqb_-j3FDA","uXgzCjAv-9k",
+"Zu6z3qUPu1s","sX4Bxks_VlI","hoNb6HuNmU0","LK7-_dgAVQE",
+"Pm7sWFzcPes","yu8nxs1gw48","wiur_AGatGU","LAdp3ZHeP4Q",
+"rUeyfai1ddc","FCDAnPFJUPA","AN8-o7ckg6k"
 ];
 
-// DOM Elements
-const songGrid = document.getElementById("songGrid");
-const playerView = document.getElementById("playerView");
-const cd = document.getElementById("cd");
-const nowTitle = document.getElementById("nowTitle");
-const prevTitle = document.getElementById("prevTitle");
-const currentTitle = document.getElementById("currentTitle");
-const nextTitle = document.getElementById("nextTitle");
+let songs = rawSongs.map((id,i)=>({
+    name:"Song "+(i+1),
+    file:id,
+    img:"img"+(i+1)+".jpg"
+}));
 
-let currentIndex = 0;
-let player;
+// Alphabetical
+songs.sort((a,b)=>a.name.localeCompare(b.name));
 
-// ENTER MUSIC APP
+let player,current=0,shuffle=false,repeat=false;
+
+const grid=document.getElementById("songGrid");
+const thumb=document.getElementById("thumb");
+const title=document.getElementById("title");
+const progress=document.getElementById("progress");
+const loader=document.getElementById("loader");
+
 function enterApp(){
-    document.getElementById("homePage").style.display="none";
-    document.getElementById("musicApp").style.display="block";
+document.getElementById("homePage").style.display="none";
+document.getElementById("app").style.display="flex";
+loadSongs();
 }
 
-// CREATE SONG GRID
-songs.forEach((song,index)=>{
-    const card = document.createElement("div");
-    card.className = "song-card";
-    card.innerHTML = `<img src="${song.img}"><h3>${song.name}</h3>`;
-    card.onclick = ()=> playSong(index);
-    songGrid.appendChild(card);
+function loadSongs(){
+grid.innerHTML="";
+songs.forEach((s,i)=>{
+let div=document.createElement("div");
+div.className="song";
+div.innerHTML=`<img src="${s.img}" onerror="this.src='https://img.youtube.com/vi/${s.file}/hqdefault.jpg'"><h4>${s.name}</h4>`;
+div.onclick=()=>playSong(i);
+grid.appendChild(div);
 });
-
-// UPDATE SLIDE TITLES
-function updateSlideTitles(){
-    let prevIndex = (currentIndex-1+songs.length)%songs.length;
-    let nextIndex = (currentIndex+1)%songs.length;
-    prevTitle.innerText = songs[prevIndex].name;
-    currentTitle.innerText = songs[currentIndex].name;
-    nextTitle.innerText = songs[nextIndex].name;
 }
 
-// YouTube IFrame API
 function onYouTubeIframeAPIReady(){
-    player = new YT.Player('youtubePlayer', {
-        height: '0',
-        width: '0',
-        videoId: songs[0].file,
-        playerVars: {
-            autoplay: 0,
-            controls: 0,
-            disablekb: 1,
-            modestbranding: 1,
-            rel: 0
-        },
-        events: {
-            'onStateChange': onPlayerStateChange
-        }
-    });
+player=new YT.Player("youtubePlayer",{height:'0',width:'0'});
 }
 
-function onPlayerStateChange(event){
-    if(event.data === YT.PlayerState.ENDED) nextSong();
+function playSong(i){
+loader.style.display="block";
+current=i;
+let s=songs[i];
+player.loadVideoById(s.file);
+thumb.src=s.img;
+title.innerText=s.name;
+setTimeout(()=>loader.style.display="none",1000);
 }
 
-// PLAY SONG (Only YouTube)
-function playSong(index){
-    currentIndex = index;
-    const song = songs[index];
-
-    if(player) player.loadVideoById(song.file);
-
-    nowTitle.innerText = song.name;
-    cd.style.backgroundImage = `url('${song.img}')`;
-    cd.classList.add("playing");
-    playerView.style.display = "flex";
-    updateSlideTitles();
-}
-
-// PLAY / PAUSE
 function togglePlay(){
-    if(!player) return;
-    const state = player.getPlayerState();
-    if(state === YT.PlayerState.PLAYING){
-        player.pauseVideo();
-        cd.classList.remove("playing");
-        document.getElementById("playBtn").innerText="▶";
-    } else {
-        player.playVideo();
-        cd.classList.add("playing");
-        document.getElementById("playBtn").innerText="⏸";
-    }
+if(player.getPlayerState()==1){player.pauseVideo();}
+else{player.playVideo();}
 }
 
-// NEXT / PREV SONG
 function nextSong(){
-    currentIndex = (currentIndex+1)%songs.length;
-    playSong(currentIndex);
+if(shuffle) current=Math.floor(Math.random()*songs.length);
+else current=(current+1)%songs.length;
+playSong(current);
 }
+
 function prevSong(){
-    currentIndex = (currentIndex-1+songs.length)%songs.length;
-    playSong(currentIndex);
+current=(current-1+songs.length)%songs.length;
+playSong(current);
 }
 
-// SKIP 10s
-function plus10(){ if(player) player.seekTo(player.getCurrentTime()+10,true); }
-function minus10(){ if(player) player.seekTo(player.getCurrentTime()-10,true); }
+function toggleShuffle(){shuffle=!shuffle;}
+function toggleRepeat(){repeat=!repeat;}
 
-// GO BACK TO GRID
-function goBack(){
-    playerView.style.display="none";
-    player?.pauseVideo();
-    cd.classList.remove("playing");
+setInterval(()=>{
+if(player && player.getDuration){
+let val=(player.getCurrentTime()/player.getDuration())*100;
+progress.value=val;
+}
+},1000);
+
+progress.oninput=()=>{
+let seek=(progress.value/100)*player.getDuration();
+player.seekTo(seek,true);
+};
+
+function toggleTheme(){
+document.body.classList.toggle("light");
 }
 
-// SEARCH SONG
 function searchSong(){
-    const input = document.getElementById("searchBar").value.toLowerCase();
-    document.querySelectorAll(".song-card").forEach(card=>{
-        card.style.display = card.innerText.toLowerCase().includes(input)?"block":"none";
-    });
+let q=document.getElementById("search").value.toLowerCase();
+document.querySelectorAll(".song").forEach(s=>{
+s.style.display=s.innerText.toLowerCase().includes(q)?"block":"none";
+});
 }
