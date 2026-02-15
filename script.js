@@ -1,4 +1,8 @@
 const orb = document.getElementById("orb");
+const startup = document.getElementById("startup");
+
+let recognition;
+let isActive = false;
 
 function speak(text) {
     orb.classList.remove("listening");
@@ -9,6 +13,7 @@ function speak(text) {
 
     speech.onend = () => {
         orb.classList.remove("speaking");
+        if (isActive) startListening();
     };
 
     window.speechSynthesis.speak(speech);
@@ -17,28 +22,31 @@ function speak(text) {
 function getReply(text) {
     text = text.toLowerCase();
 
-    if (text.includes("hello")) 
-        return "Hello Raghav. I am R H K. Your personal AI assistant.";
+    if (text.includes("hello"))
+        return "Hello Raghav. R H K online.";
 
-    if (text.includes("time")) 
-        return "The current time is " + new Date().toLocaleTimeString();
+    if (text.includes("time"))
+        return "Current time is " + new Date().toLocaleTimeString();
 
-    if (text.includes("who am i")) 
-        return "You are Raghav. Engineering student. Future system builder.";
+    if (text.includes("who am i"))
+        return "You are Raghav. Engineering student. Future AI architect.";
 
-    if (text.includes("motivate")) 
-        return "Discipline beats motivation. Act even when you do not feel like it.";
+    if (text.includes("motivate"))
+        return "Stop waiting for motivation. Execute with discipline.";
 
-    return "Command not recognized. Upgrade my intelligence.";
+    return "Command not recognized. Expand my intelligence.";
 }
 
 function startListening() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-
-    recognition.lang = "en-US";
-    recognition.start();
+    if (!recognition) {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = "en-US";
+        recognition.continuous = false;
+    }
 
     orb.classList.add("listening");
+
+    recognition.start();
 
     recognition.onresult = function(event) {
         const userText = event.results[0][0].transcript;
@@ -48,7 +56,13 @@ function startListening() {
 
     recognition.onerror = function() {
         orb.classList.remove("listening");
+        if (isActive) startListening();
     };
 }
 
-orb.addEventListener("click", startListening);
+orb.addEventListener("click", () => {
+    if (!isActive) {
+        isActive = true;
+        speak("Continuous listening activated.");
+    }
+});
