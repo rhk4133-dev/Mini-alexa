@@ -1,136 +1,78 @@
-let songs=[
-"h13lbNkUaEg","sf7VoyW_5ro","EtGh9oC2SZ0","yh3C2JU-m_Y",
-"1PxT9i4-uTc","Q-_cu_78eIA","0pVMxbQh-Lc","NeXbmEnpSz0",
-"palMj0iq-3g","LbrJZgyqp5w","vipdDXKHT_0","ElIizBi-rEc"
+const playlist = [
+    { id: 'hoNb6HuNmU0', title: 'Khairiyat', artist: 'Arijit Singh' },
+    { id: '5Eqb_-j3FDA', title: 'Pasoori', artist: 'Ali Sethi' },
+    { id: 'LK7-_dgAVQE', title: 'Tauba Tauba', artist: 'Karan Aujla' },
+    { id: 'hxMNYkLN7tI', title: 'Aaj Ki Raat', artist: 'Stree 2' },
+    { id: 'kmjeMrjOjFA', title: 'Taambdi Chaamdi', artist: 'Kratex' },
+    { id: 'sCbbMZ-q4-I', title: 'Lut Gaye', artist: 'Jubin Nautiyal' },
+    { id: '8of5w7RgcTc', title: 'Pal Pal', artist: 'Afusic' }
 ];
 
-// ADD MORE LIKE THIS:
-// songs.push("VIDEO_ID");
-
-let currentIndex=0;
 let player;
-let repeat=0;
+const songGrid = document.getElementById('song-grid');
+const masterToggle = document.getElementById('master-toggle');
 
-const list=document.getElementById("songList");
-const cover=document.getElementById("cover");
-const title=document.getElementById("title");
-const miniCover=document.getElementById("miniCover");
-const miniTitle=document.getElementById("miniTitle");
-const loader=document.getElementById("loader");
-
-function createPlaylist(){
-  list.innerHTML="";
-  songs.forEach((id,index)=>{
-    const card=document.createElement("div");
-    card.className="song-card";
-    card.innerHTML=`
-      <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
-      <p>Song ${index+1}</p>
+// Build Data Modules
+playlist.forEach(song => {
+    const module = document.createElement('div');
+    module.className = 'data-module';
+    module.innerHTML = `
+        <img src="https://img.youtube.com/vi/${song.id}/default.jpg">
+        <div class="module-info">
+            <div style="font-size: 14px; font-weight:bold">${song.title}</div>
+            <div style="font-size: 10px; color: #666">${song.artist}</div>
+        </div>
     `;
-    card.onclick=()=>playSong(index);
-    list.appendChild(card);
-  });
+    module.onclick = () => bootTrack(song);
+    songGrid.appendChild(module);
+});
+
+// YT API Loader
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+document.head.appendChild(tag);
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('yt-engine', {
+        height: '0', width: '0',
+        events: { 'onStateChange': onStateChange }
+    });
 }
 
-createPlaylist();
-
-function onYouTubeIframeAPIReady(){
-  player=new YT.Player('youtubePlayer',{
-    height:'0',
-    width:'0',
-    videoId:songs[0],
-    playerVars:{controls:0},
-    events:{'onStateChange':onStateChange}
-  });
+function bootTrack(song) {
+    player.loadVideoById(song.id);
+    document.getElementById('core-title').innerText = song.title;
+    document.getElementById('core-artist').innerText = song.artist;
+    
+    const thumb = document.getElementById('core-thumb');
+    thumb.src = `https://img.youtube.com/vi/${song.id}/default.jpg`;
+    thumb.classList.remove('hidden');
+    
+    masterToggle.innerText = 'PAUSE';
 }
 
-function playSong(index){
-  loader.style.display="flex";
-  currentIndex=index;
-  player.loadVideoById(songs[index]);
-
-  let img=`https://img.youtube.com/vi/${songs[index]}/hqdefault.jpg`;
-  cover.src=img;
-  miniCover.src=img;
-  title.innerText="Song "+(index+1);
-  miniTitle.innerText="Song "+(index+1);
-
-  openPlayer();
-}
-
-function onStateChange(event){
-  if(event.data==YT.PlayerState.PLAYING){
-    loader.style.display="none";
-    document.getElementById("playBtn").innerText="⏸";
-    document.getElementById("miniPlay").innerText="⏸";
-  }
-}
-
-function togglePlay(){
-  if(player.getPlayerState()==1){
-    player.pauseVideo();
-    document.getElementById("playBtn").innerText="▶";
-    document.getElementById("miniPlay").innerText="▶";
-  }else{
-    player.playVideo();
-    document.getElementById("playBtn").innerText="⏸";
-    document.getElementById("miniPlay").innerText="⏸";
-  }
-}
-
-function nextSong(){
-  currentIndex=(currentIndex+1)%songs.length;
-  playSong(currentIndex);
-}
-
-function prevSong(){
-  currentIndex=(currentIndex-1+songs.length)%songs.length;
-  playSong(currentIndex);
-}
-
-function shuffleSongs(){
-  songs.sort(()=>Math.random()-0.5);
-  createPlaylist();
-  alert("Playlist Shuffled 🔀");
-}
-
-function repeatMode(){
-  repeat=(repeat+1)%3;
-  alert("Repeat Mode: "+repeat);
-}
-
-function openPlayer(){
-  document.getElementById("fullPlayer").classList.add("active");
-}
-
-function closePlayer(){
-  document.getElementById("fullPlayer").classList.remove("active");
-}
-
-/* Search */
-document.getElementById("searchBar").addEventListener("input",function(){
-  let value=this.value.toLowerCase();
-  let cards=document.querySelectorAll(".song-card");
-
-  cards.forEach((card,index)=>{
-    if(("song "+(index+1)).toLowerCase().includes(value)){
-      card.style.display="flex";
-    }else{
-      card.style.display="none";
+function onStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        updateCore();
     }
-  });
-});
+}
 
-/* Swipe */
-let touchStartX=0;
-let touchEndX=0;
+function updateCore() {
+    setInterval(() => {
+        if (player && player.getDuration) {
+            const p = (player.getCurrentTime() / player.getDuration()) * 100;
+            document.getElementById('load-progress').style.width = p + "%";
+        }
+    }, 1000);
+}
 
-document.getElementById("fullPlayer").addEventListener("touchstart",e=>{
-  touchStartX=e.changedTouches[0].screenX;
-});
-
-document.getElementById("fullPlayer").addEventListener("touchend",e=>{
-  touchEndX=e.changedTouches[0].screenX;
-  if(touchEndX < touchStartX-50) nextSong();
-  if(touchEndX > touchStartX+50) prevSong();
-});
+masterToggle.onclick = () => {
+    const state = player.getPlayerState();
+    if (state === 1) {
+        player.pauseVideo();
+        masterToggle.innerText = 'RESUME';
+    } else {
+        player.playVideo();
+        masterToggle.innerText = 'PAUSE';
+    }
+};
