@@ -1,48 +1,54 @@
-const chatBox = document.getElementById("chatBox");
-
-function addMessage(sender, message) {
-    const msg = document.createElement("p");
-    msg.innerHTML = "<strong>" + sender + ":</strong> " + message;
-    chatBox.appendChild(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
+const orb = document.getElementById("orb");
 
 function speak(text) {
+    orb.classList.remove("listening");
+    orb.classList.add("speaking");
+
     const speech = new SpeechSynthesisUtterance(text);
     speech.lang = "en-US";
+
+    speech.onend = () => {
+        orb.classList.remove("speaking");
+    };
+
     window.speechSynthesis.speak(speech);
 }
 
-function sendMessage() {
-    const input = document.getElementById("userInput");
-    const userText = input.value.toLowerCase();
-    if (userText === "") return;
-
-    addMessage("You", userText);
-    input.value = "";
-
-    let reply = getReply(userText);
-    setTimeout(() => {
-        addMessage("RHK", reply);
-        speak(reply);
-    }, 500);
-}
-
 function getReply(text) {
-    if (text.includes("hello")) return "Hello Raghav. How can I assist you?";
-    if (text.includes("your name")) return "I am RHK, your personal AI assistant.";
-    if (text.includes("time")) return "The current time is " + new Date().toLocaleTimeString();
-    if (text.includes("who am i")) return "You are Raghav, future engineer.";
-    return "I am still learning. Upgrade me.";
+    text = text.toLowerCase();
+
+    if (text.includes("hello")) 
+        return "Hello Raghav. I am R H K. Your personal AI assistant.";
+
+    if (text.includes("time")) 
+        return "The current time is " + new Date().toLocaleTimeString();
+
+    if (text.includes("who am i")) 
+        return "You are Raghav. Engineering student. Future system builder.";
+
+    if (text.includes("motivate")) 
+        return "Discipline beats motivation. Act even when you do not feel like it.";
+
+    return "Command not recognized. Upgrade my intelligence.";
 }
 
 function startListening() {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
     recognition.lang = "en-US";
     recognition.start();
 
+    orb.classList.add("listening");
+
     recognition.onresult = function(event) {
-        document.getElementById("userInput").value = event.results[0][0].transcript;
-        sendMessage();
+        const userText = event.results[0][0].transcript;
+        const reply = getReply(userText);
+        speak(reply);
+    };
+
+    recognition.onerror = function() {
+        orb.classList.remove("listening");
     };
 }
+
+orb.addEventListener("click", startListening);
