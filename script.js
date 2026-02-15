@@ -1,8 +1,10 @@
 const orb = document.getElementById("orb");
-const startup = document.getElementById("startup");
+const statusText = document.getElementById("status");
+
+const API_KEY = "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";
 
 let recognition;
-let isActive = false;
+let isAwake = false;
 
 function speak(text) {
     orb.classList.remove("listening");
@@ -13,56 +15,64 @@ function speak(text) {
 
     speech.onend = () => {
         orb.classList.remove("speaking");
-        if (isActive) startListening();
+        startListening();
     };
 
     window.speechSynthesis.speak(speech);
 }
 
-function getReply(text) {
-    text = text.toLowerCase();
+async function askAI(question) {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + API_KEY,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "openai/gpt-3.5-turbo",
+            messages: [{ role: "user", content: question }]
+        })
+    });
 
-    if (text.includes("hello"))
-        return "Hello Raghav. R H K online.";
-
-    if (text.includes("time"))
-        return "Current time is " + new Date().toLocaleTimeString();
-
-    if (text.includes("who am i"))
-        return "You are Raghav. Engineering student. Future AI architect.";
-
-    if (text.includes("motivate"))
-        return "Stop waiting for motivation. Execute with discipline.";
-
-    return "Command not recognized. Expand my intelligence.";
+    const data = await response.json();
+    return data.choices[0].message.content;
 }
 
 function startListening() {
     if (!recognition) {
         recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = "en-US";
-        recognition.continuous = false;
+        recognition.continuous = true;
     }
 
     orb.classList.add("listening");
-
     recognition.start();
 
-    recognition.onresult = function(event) {
-        const userText = event.results[0][0].transcript;
-        const reply = getReply(userText);
-        speak(reply);
+    recognition.onresult = async function(event) {
+        const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+
+        if (!isAwake && transcript.includes("hey r h k")) {
+            isAwake = true;
+            statusText.innerText = "Listening...";
+            speak("Yes Raghav?");
+            return;
+        }
+
+        if (isAwake) {
+            isAwake = false;
+            statusText.innerText = "Processing...";
+            const reply = await askAI(transcript);
+            speak(reply);
+        }
     };
 
     recognition.onerror = function() {
-        orb.classList.remove("listening");
-        if (isActive) startListening();
+        recognition.stop();
+        startListening();
     };
 }
 
-orb.addEventListener("click", () => {
-    if (!isActive) {
-        isActive = true;
-        speak("Continuous listening activated.");
-    }
+/* First interaction required */
+document.body.addEventListener("click", () => {
+    speak("R H K activated.");
 });
