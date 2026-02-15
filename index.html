@@ -1,51 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON CORE // AUDIO INTERFACE</title>
+    <title>RHK AI</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="scanner-line"></div>
+<div class="container">
+    <h1>RHK AI</h1>
+    <div class="chat-box" id="chatBox"></div>
 
-    <div class="interface-wrapper">
-        <header class="status-bar">
-            <div class="system-id">SYS_VER: 2.0.26</div>
-            <div class="glitch-title" data-text="NEON_CORE">NEON_CORE</div>
-            <div class="uptime">SIGNAL: STABLE</div>
-        </header>
-
-        <main class="data-hub">
-            <div class="module-grid" id="song-grid">
-                </div>
-        </main>
-
-        <div class="control-core">
-            <div class="core-inner">
-                <div class="track-display">
-                    <img src="" id="core-thumb" class="hidden">
-                    <div class="track-meta">
-                        <h2 id="core-title">IDLE_STATE</h2>
-                        <p id="core-artist">Awaiting Input...</p>
-                    </div>
-                </div>
-                
-                <div class="playback-nexus">
-                    <button id="prev" class="nexus-btn">«</button>
-                    <button id="master-toggle" class="nexus-btn-main">INITIALIZE</button>
-                    <button id="next" class="nexus-btn">»</button>
-                </div>
-
-                <div class="load-bar-container">
-                    <div id="load-progress" class="load-bar"></div>
-                </div>
-            </div>
-        </div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Talk to RHK...">
+        <button onclick="sendMessage()">Send</button>
+        <button onclick="startListening()">🎤</button>
     </div>
+</div>
 
-    <div id="yt-engine"></div>
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
