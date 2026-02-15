@@ -2,111 +2,18 @@
 <html>
 <head>
     <title>RHK AI</title>
-    <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            background: radial-gradient(circle at center, #000 20%, #050510 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-        }
-
-        .orb {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #00ffff, #001f3f);
-            box-shadow: 0 0 30px #00ffff,
-                        0 0 60px #00ffff,
-                        0 0 90px #00ffff;
-            animation: idle 3s infinite ease-in-out;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .orb.active {
-            animation: speak 1s infinite alternate;
-            box-shadow: 0 0 40px #ff00ff,
-                        0 0 80px #ff00ff,
-                        0 0 120px #ff00ff;
-        }
-
-        @keyframes idle {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes speak {
-            from { transform: scale(1); }
-            to { transform: scale(1.2); }
-        }
-
-        .title {
-            position: absolute;
-            top: 30px;
-            color: #00ffff;
-            text-shadow: 0 0 20px #00ffff;
-            font-size: 28px;
-        }
-
-        .hint {
-            position: absolute;
-            bottom: 40px;
-            color: #888;
-            font-size: 14px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="title">RHK AI</div>
-<div class="orb" id="orb"></div>
+
+<div class="orb-container">
+    <div class="orb" id="orb"></div>
+</div>
+
 <div class="hint">Tap the orb to speak</div>
 
-<script>
-    const orb = document.getElementById("orb");
-
-    function speak(text) {
-        orb.classList.add("active");
-
-        const speech = new SpeechSynthesisUtterance(text);
-        speech.lang = "en-US";
-
-        speech.onend = () => {
-            orb.classList.remove("active");
-        };
-
-        window.speechSynthesis.speak(speech);
-    }
-
-    function getReply(text) {
-        text = text.toLowerCase();
-
-        if (text.includes("hello")) return "Hello Raghav. I am R H K. Your personal AI assistant.";
-        if (text.includes("time")) return "The current time is " + new Date().toLocaleTimeString();
-        if (text.includes("who am i")) return "You are Raghav. Future engineer. Builder of intelligent systems.";
-        if (text.includes("motivate")) return "Discipline beats motivation. Work even when you don't feel like it.";
-        return "I am evolving. Upgrade my intelligence.";
-    }
-
-    function startListening() {
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = "en-US";
-        recognition.start();
-
-        recognition.onresult = function(event) {
-            const userText = event.results[0][0].transcript;
-            const reply = getReply(userText);
-            speak(reply);
-        };
-    }
-
-    orb.addEventListener("click", startListening);
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
