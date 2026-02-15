@@ -1,0 +1,75 @@
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at center, #000 20%, #050510 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    flex-direction: column;
+}
+
+.title {
+    position: absolute;
+    top: 30px;
+    font-size: 28px;
+    color: #00ffff;
+    text-shadow: 0 0 20px #00ffff;
+}
+
+.hint {
+    position: absolute;
+    bottom: 40px;
+    font-size: 14px;
+    color: #888;
+}
+
+.orb-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.orb {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #00ffff, #001f3f);
+    box-shadow:
+        0 0 30px #00ffff,
+        0 0 60px #00ffff,
+        0 0 90px #00ffff;
+    animation: idle 3s infinite ease-in-out;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Listening state */
+.orb.listening {
+    box-shadow:
+        0 0 40px #00ff00,
+        0 0 80px #00ff00,
+        0 0 120px #00ff00;
+    transform: scale(1.1);
+}
+
+/* Speaking state */
+.orb.speaking {
+    animation: speaking 1s infinite alternate;
+    box-shadow:
+        0 0 40px #ff00ff,
+        0 0 80px #ff00ff,
+        0 0 120px #ff00ff;
+}
+
+@keyframes idle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+@keyframes speaking {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
