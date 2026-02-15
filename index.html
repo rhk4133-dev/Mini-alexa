@@ -1,51 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>RHK Music</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://www.youtube.com/iframe_api"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON CORE // AUDIO INTERFACE</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-  <h1>🎵 RHK MUSIC</h1>
-</header>
+    <div class="scanner-line"></div>
 
-<input type="text" id="searchBar" placeholder="🔍 Search song..." class="search-bar">
+    <div class="interface-wrapper">
+        <header class="status-bar">
+            <div class="system-id">SYS_VER: 2.0.26</div>
+            <div class="glitch-title" data-text="NEON_CORE">NEON_CORE</div>
+            <div class="uptime">SIGNAL: STABLE</div>
+        </header>
 
-<div class="playlist" id="songList"></div>
+        <main class="data-hub">
+            <div class="module-grid" id="song-grid">
+                </div>
+        </main>
 
-<!-- Mini Player -->
-<div class="mini-player" onclick="openPlayer()">
-  <img id="miniCover">
-  <div>
-    <p id="miniTitle">Select Song</p>
-  </div>
-  <button id="miniPlay">▶</button>
-</div>
+        <div class="control-core">
+            <div class="core-inner">
+                <div class="track-display">
+                    <img src="" id="core-thumb" class="hidden">
+                    <div class="track-meta">
+                        <h2 id="core-title">IDLE_STATE</h2>
+                        <p id="core-artist">Awaiting Input...</p>
+                    </div>
+                </div>
+                
+                <div class="playback-nexus">
+                    <button id="prev" class="nexus-btn">«</button>
+                    <button id="master-toggle" class="nexus-btn-main">INITIALIZE</button>
+                    <button id="next" class="nexus-btn">»</button>
+                </div>
 
-<!-- Full Player -->
-<div class="full-player" id="fullPlayer">
-  <div class="player-content">
-    <img id="cover" class="cover">
-    <h2 id="title"></h2>
-
-    <div class="controls">
-      <button onclick="shuffleSongs()">🔀</button>
-      <button onclick="prevSong()">⏮</button>
-      <button onclick="togglePlay()" id="playBtn">▶</button>
-      <button onclick="nextSong()">⏭</button>
-      <button onclick="repeatMode()">🔁</button>
+                <div class="load-bar-container">
+                    <div id="load-progress" class="load-bar"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <button class="close-btn" onclick="closePlayer()">⬇ Close</button>
-  </div>
-</div>
-
-<div id="loader" class="loader">Loading...</div>
-<div id="youtubePlayer"></div>
-
-<script src="script.js"></script>
+    <div id="yt-engine"></div>
+    <script src="script.js"></script>
 </body>
 </html>
