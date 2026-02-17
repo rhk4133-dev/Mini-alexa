@@ -1,106 +1,79 @@
-const orb = document.getElementById("orb");
-const wave = document.getElementById("wave");
-const statusText = document.getElementById("status");
+let player;
+const cd = document.getElementById("cd");
+const eyes = document.getElementById("eyes");
+const talkBtn = document.getElementById("talkBtn");
+const songTitle = document.getElementById("songTitle");
 
-const API_KEY = "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";
+const songs = {
+    "believer": "h13lbNkUaEg",
+    "shape of you": "sf7VoyW_5ro",
+    "srivalli": "EtGh9oC2SZ0"
+};
 
-let recognition;
-let isActive = false;
-let isSpeaking = false;
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player("player", {
+        height: "0",
+        width: "0",
+        videoId: "",
+        playerVars: { 'playsinline': 1 }
+    });
+}
+
+function playVideo() {
+    player.playVideo();
+    cd.classList.add("rotate");
+    eyes.classList.add("active");
+}
+
+function pauseVideo() {
+    player.pauseVideo();
+    cd.classList.remove("rotate");
+    eyes.classList.remove("active");
+}
+
+function forward10() {
+    let current = player.getCurrentTime();
+    player.seekTo(current + 10, true);
+}
 
 function speak(text) {
-    isSpeaking = true;
-
-    orb.classList.remove("listening");
-    wave.classList.remove("active");
-    orb.classList.add("speaking");
-
     const speech = new SpeechSynthesisUtterance(text);
     speech.lang = "en-US";
-
-    speech.onend = () => {
-        isSpeaking = false;
-        orb.classList.remove("speaking");
-
-        if (isActive) {
-            startListening();
-        }
-    };
-
     window.speechSynthesis.speak(speech);
 }
 
-async function askAI(question) {
-    try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": "Bearer " + API_KEY,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "mistralai/mistral-7b-instruct",
-                messages: [{ role: "user", content: question }]
-            })
-        });
-
-        const data = await response.json();
-        return data.choices[0].message.content;
-
-    } catch (error) {
-        return "API error. Check your key.";
-    }
-}
-
 function startListening() {
-
-    if (!('webkitSpeechRecognition' in window)) {
-        alert("Speech recognition not supported on this device.");
-        return;
-    }
-
-    recognition = new webkitSpeechRecognition();
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = "en-US";
-    recognition.continuous = true;
-    recognition.interimResults = false;
 
-    orb.classList.add("listening");
-    wave.classList.add("active");
-    statusText.innerText = "Listening...";
+    recognition.onresult = function(event) {
+        let command = event.results[0][0].transcript.toLowerCase();
 
-    recognition.start();
+        if (command.includes("hey rhk")) {
+            speak("Hello. Which song do you want?");
+            return;
+        }
 
-    recognition.onresult = async function(event) {
+        let found = false;
 
-        if (isSpeaking) return;
+        for (let key in songs) {
+            if (command.includes(key)) {
+                player.loadVideoById(songs[key]);
+                songTitle.innerText = "Playing: " + key;
+                speak("Playing " + key);
+                cd.classList.add("rotate");
+                eyes.classList.add("active");
+                found = true;
+                break;
+            }
+        }
 
-        const transcript = event.results[event.results.length - 1][0].transcript;
-
-        recognition.stop();
-
-        statusText.innerText = "Processing...";
-        const reply = await askAI(transcript);
-        speak(reply);
-    };
-
-    recognition.onerror = function(event) {
-        console.log("Speech error:", event.error);
-    };
-
-    recognition.onend = function() {
-        if (isActive && !isSpeaking) {
-            startListening();
+        if (!found) {
+            speak("Song not found.");
         }
     };
+
+    recognition.start();
 }
 
-orb.addEventListener("click", () => {
-    if (!isActive) {
-        isActive = true;
-
-        // START MIC IMMEDIATELY (mobile requirement)
-        startListening();
-
-        speak("R H K activated.");
-    }
-});
+talkBtn.addEventListener("click", startListening);
