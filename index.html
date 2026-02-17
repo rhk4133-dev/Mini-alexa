@@ -6,15 +6,33 @@
 </head>
 <body>
 
-<div class="title">RHK AI</div>
+<div class="assistant">
+    <div class="eyes" id="eyes">
+        <div class="eye"></div>
+        <div class="eye"></div>
+    </div>
 
-<div class="orb-wrapper">
-    <div class="wave" id="wave"></div>
-    <div class="orb" id="orb"></div>
+    <div class="mouth">😊</div>
+
+    <button id="talkBtn">🎤 Talk</button>
 </div>
 
-<div class="status" id="status">Tap the orb to activate</div>
+<div class="player-section">
+    <div class="cd" id="cd"></div>
 
+    <h3 id="songTitle">No Song Playing</h3>
+
+    <div class="controls">
+        <button onclick="playVideo()">▶</button>
+        <button onclick="pauseVideo()">⏸</button>
+        <button onclick="forward10()">⏩ +10s</button>
+    </div>
+</div>
+
+<!-- Hidden YouTube player -->
+<div id="player" style="display:none;"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 <script src="script.js"></script>
 </body>
 </html>
