@@ -1,87 +1,77 @@
 body {
     margin: 0;
-    height: 100vh;
-    background: radial-gradient(circle at center, #000 20%, #02021a 100%);
+    background: black;
+    color: white;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Eyes */
+.eyes {
     display: flex;
     justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
+    gap: 50px;
+    margin-top: 80px;
 }
 
-.title {
-    position: absolute;
-    top: 30px;
-    font-size: 30px;
-    color: #00ffff;
-    text-shadow: 0 0 25px #00ffff;
-}
-
-.status {
-    position: absolute;
-    bottom: 40px;
-    color: #00ffff;
-}
-
-.orb-wrapper {
-    position: relative;
-}
-
-.wave {
-    position: absolute;
-    width: 350px;
-    height: 350px;
+.eye {
+    width: 60px;
+    height: 60px;
+    background: #00c3ff;
     border-radius: 50%;
-    border: 3px solid #00ffff;
-    opacity: 0;
+    animation: blink 2s infinite;
+    transition: all 0.3s ease;
 }
 
-.orb {
-    width: 280px;
-    height: 280px;
+@keyframes blink {
+    0%, 90%, 100% { height: 60px; }
+    95% { height: 5px; }
+}
+
+/* Active Eyes */
+.eyes.active .eye {
+    height: 80px;
+    width: 80px;
+    animation: none;
+}
+
+/* Smile */
+.mouth {
+    font-size: 40px;
+    margin-top: 10px;
+}
+
+/* CD */
+.cd {
+    width: 200px;
+    height: 200px;
+    margin: 40px auto;
     border-radius: 50%;
-    background: radial-gradient(circle, #00ffff, #001f3f);
-    box-shadow:
-        0 0 40px #00ffff,
-        0 0 80px #00ffff,
-        0 0 150px #00ffff;
+    background: radial-gradient(circle, #222 40%, #00c3ff 60%, #000 100%);
+    box-shadow: 0 0 30px #00c3ff;
+    transition: transform 0.3s linear;
+}
+
+.rotate {
+    animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Buttons */
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    background: #00c3ff;
+    border: none;
+    border-radius: 10px;
     cursor: pointer;
-    transition: 0.3s;
 }
 
-.orb.listening {
-    box-shadow:
-        0 0 60px #00ff00,
-        0 0 120px #00ff00,
-        0 0 200px #00ff00;
-}
-
-.orb.speaking {
-    box-shadow:
-        0 0 60px #ff00ff,
-        0 0 120px #ff00ff,
-        0 0 200px #ff00ff;
-    animation: speakAnim 1s infinite alternate;
-}
-
-@keyframes speakAnim {
-    from { transform: scale(1); }
-    to { transform: scale(1.15); }
-}
-
-.wave.active {
-    animation: wavePulse 1.5s infinite;
-    opacity: 1;
-}
-
-@keyframes wavePulse {
-    0% {
-        transform: scale(1);
-        opacity: 0.7;
-    }
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
+button:hover {
+    background: white;
+    color: black;
 }
