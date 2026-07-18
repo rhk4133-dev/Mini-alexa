@@ -1,38 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>RHK AI</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RHK Login</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="assistant">
-    <div class="eyes" id="eyes">
-        <div class="eye"></div>
-        <div class="eye"></div>
-    </div>
+<div class="container">
+    <h1>RHK</h1>
+    <p>Sign in to continue</p>
 
-    <div class="mouth">😊</div>
+    <input type="email" id="email" placeholder="Email">
 
-    <button id="talkBtn">🎤 Talk</button>
+    <input type="password" id="password" placeholder="Password">
+
+    <button id="loginBtn">Login</button>
+
+    <button id="googleBtn">Continue with Google</button>
+
+    <button id="signupBtn">Create Account</button>
+
+    <a href="#" id="forgotBtn">Forgot Password?</a>
+
 </div>
 
-<div class="player-section">
-    <div class="cd" id="cd"></div>
+<script type="module" src="script.js"></script>
 
-    <h3 id="songTitle">No Song Playing</h3>
-
-    <div class="controls">
-        <button onclick="playVideo()">▶</button>
-        <button onclick="pauseVideo()">⏸</button>
-        <button onclick="forward10()">⏩ +10s</button>
-    </div>
-</div>
-
-<!-- Hidden YouTube player -->
-<div id="player" style="display:none;"></div>
-
-<script src="https://www.youtube.com/iframe_api"></script>
-<script src="script.js"></script>
 </body>
 </html>
