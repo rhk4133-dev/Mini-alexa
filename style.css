@@ -1,77 +1,93 @@
-body {
-    margin: 0;
-    background: black;
-    color: white;
-    text-align: center;
-    font-family: Arial, sans-serif;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
 }
 
-/* Eyes */
-.eyes {
-    display: flex;
-    justify-content: center;
-    gap: 50px;
-    margin-top: 80px;
+body{
+background:#fafafa;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
-.eye {
-    width: 60px;
-    height: 60px;
-    background: #00c3ff;
-    border-radius: 50%;
-    animation: blink 2s infinite;
-    transition: all 0.3s ease;
+.container{
+width:360px;
+background:#fff;
+padding:30px;
+border-radius:15px;
+box-shadow:0 5px 20px rgba(0,0,0,.15);
+text-align:center;
 }
 
-@keyframes blink {
-    0%, 90%, 100% { height: 60px; }
-    95% { height: 5px; }
+h1{
+font-size:45px;
+color:#0095f6;
+margin-bottom:10px;
 }
 
-/* Active Eyes */
-.eyes.active .eye {
-    height: 80px;
-    width: 80px;
-    animation: none;
+p{
+color:#666;
+margin-bottom:20px;
 }
 
-/* Smile */
-.mouth {
-    font-size: 40px;
-    margin-top: 10px;
+input{
+width:100%;
+padding:13px;
+margin:10px 0;
+border:1px solid #ddd;
+border-radius:8px;
+font-size:15px;
+outline:none;
 }
 
-/* CD */
-.cd {
-    width: 200px;
-    height: 200px;
-    margin: 40px auto;
-    border-radius: 50%;
-    background: radial-gradient(circle, #222 40%, #00c3ff 60%, #000 100%);
-    box-shadow: 0 0 30px #00c3ff;
-    transition: transform 0.3s linear;
+input:focus{
+border-color:#0095f6;
 }
 
-.rotate {
-    animation: spin 3s linear infinite;
+button{
+width:100%;
+padding:13px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+transition:.3s;
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+#loginBtn{
+background:#0095f6;
+color:white;
 }
 
-/* Buttons */
-button {
-    padding: 10px 20px;
-    margin: 5px;
-    background: #00c3ff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
+#googleBtn{
+background:#db4437;
+color:white;
 }
 
-button:hover {
-    background: white;
-    color: black;
+#signupBtn{
+background:#222;
+color:white;
+}
+
+button:hover{
+transform:scale(1.02);
+opacity:.9;
+}
+
+a{
+display:block;
+margin-top:18px;
+text-decoration:none;
+color:#0095f6;
+font-size:15px;
+}
+
+@media(max-width:450px){
+.container{
+width:95%;
+}
 }
