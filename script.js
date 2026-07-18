@@ -1,79 +1,83 @@
-let player;
-const cd = document.getElementById("cd");
-const eyes = document.getElementById("eyes");
-const talkBtn = document.getElementById("talkBtn");
-const songTitle = document.getElementById("songTitle");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
-const songs = {
-    "believer": "h13lbNkUaEg",
-    "shape of you": "sf7VoyW_5ro",
-    "srivalli": "EtGh9oC2SZ0"
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAHUju18VBAdDFoQJhsVWp7oUqBxhfwThE",
+  authDomain: "rhk-app-e34c6.firebaseapp.com",
+  projectId: "rhk-app-e34c6",
+  storageBucket: "rhk-app-e34c6.firebasestorage.app",
+  messagingSenderId: "1016565109006",
+  appId: "1:1016565109006:web:eb7ec260a601a16e5ac75f",
+  measurementId: "G-814PTRRQVQ"
 };
 
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player("player", {
-        height: "0",
-        width: "0",
-        videoId: "",
-        playerVars: { 'playsinline': 1 }
-    });
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-function playVideo() {
-    player.playVideo();
-    cd.classList.add("rotate");
-    eyes.classList.add("active");
-}
+// Login
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-function pauseVideo() {
-    player.pauseVideo();
-    cd.classList.remove("rotate");
-    eyes.classList.remove("active");
-}
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    alert("Login Successful!");
+    window.location.href = "home.html";
+  } catch (error) {
+    alert(error.message);
+  }
+});
 
-function forward10() {
-    let current = player.getCurrentTime();
-    player.seekTo(current + 10, true);
-}
+// Signup
+document.getElementById("signupBtn").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-function speak(text) {
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "en-US";
-    window.speechSynthesis.speak(speech);
-}
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    alert("Account Created Successfully!");
+    window.location.href = "home.html";
+  } catch (error) {
+    alert(error.message);
+  }
+});
 
-function startListening() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = "en-US";
+// Google Login
+document.getElementById("googleBtn").addEventListener("click", async () => {
+  const provider = new GoogleAuthProvider();
 
-    recognition.onresult = function(event) {
-        let command = event.results[0][0].transcript.toLowerCase();
+  try {
+    await signInWithPopup(auth, provider);
+    alert("Google Login Successful!");
+    window.location.href = "home.html";
+  } catch (error) {
+    alert(error.message);
+  }
+});
 
-        if (command.includes("hey rhk")) {
-            speak("Hello. Which song do you want?");
-            return;
-        }
+// Forgot Password
+document.getElementById("forgotBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
 
-        let found = false;
+  const email = document.getElementById("email").value.trim();
 
-        for (let key in songs) {
-            if (command.includes(key)) {
-                player.loadVideoById(songs[key]);
-                songTitle.innerText = "Playing: " + key;
-                speak("Playing " + key);
-                cd.classList.add("rotate");
-                eyes.classList.add("active");
-                found = true;
-                break;
-            }
-        }
+  if (!email) {
+    alert("Please enter your email first.");
+    return;
+  }
 
-        if (!found) {
-            speak("Song not found.");
-        }
-    };
-
-    recognition.start();
-}
-
-talkBtn.addEventListener("click", startListening);
+  try {
+    await sendPasswordResetEmail(auth, email);
+    alert("Password reset email sent.");
+  } catch (error) {
+    alert(error.message);
+  }
+});
